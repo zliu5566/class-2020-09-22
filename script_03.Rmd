@@ -1,0 +1,74 @@
+---
+title: "Week 3"
+author: "David Kane"
+output: html_document
+---
+
+Go to https://registrar.fas.harvard.edu/faculty-staff/courses/enrollment and scroll down to "Access the Current Course Enrollment Numbers." Click on that to download the Excel file. Create a folder in your project called `new_data`. Move the Excel file into that folder. Note that, even if you did this last week, you are doing it again because Harvard has updated the file. The file might be dated either September 21 or 22. We won't know till class!
+
+Note that I have already created a directory called "old_data" and included the file from September 1 in it, along with other data which I have collected. Because I am your buddy, I even give you the code for reading it in! (Although I did leave one mistake for you to find . . .)
+
+Load **tidyverse**, **readxl* and **janitor** into your setup chunk.
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(janitor)
+knitr::opts_chunk$set(echo = TRUE)
+
+# Most groups got something like this going last week. Note the use of skip = 3
+# to get rid of the garbage rows at the top of the file. Note the is.na()
+# filter, which gets rid of the rows at the bottom, especially the dangerous
+# summary row. Raw excel sheets are dangerous! Note that it was easy to naively
+# assume that there was only one row per class. Untrue!
+
+sep_old <- 
+  read_excel("old_data/class_enrollment_summary_by_term_9-1-2020.xlsx", 
+             skip = 3) %>% 
+  clean_names() %>% 
+  filter(! is.na(course_title)) %>% 
+  select(-grad, -non_degree, -x_reg, -vus, -employee, 
+         -withdraw, -total, -instructor_full_name, -course_section_code) %>%
+  rename(id = course_id,
+         title = course_title,
+         name = course_name,
+         department = course_department) %>% 
+  filter(u_grad > 10)
+
+# But this is not correct! Look for Gov 50: Data. What do you see? What can you
+# do to clean it up?
+
+```
+
+### Scene 1
+
+**Prompt:** First, figure out what is wrong with the `sep_old` object. Edit the above code to fix it.
+
+Second, read in and clean the new data, creating an object called `sep_new`. 
+
+
+
+### Scene 2
+
+Dean Amanda Claybaugh is concerned about the drop in undergradaute enrollment in some courses between September 1 and today. She wants you to analyze this issue. Before you dive into the details, provide some bullet points as to how Wisdom and Temperance apply to this situation. Every student should have several bullet points. Someone will be asked to share their screen and discuss.
+
+Before we start on the model, Wisdom suggests we should:
+
+
+After we have a model, Temperance suggests we should:
+
+
+
+### Scene 3
+
+**Prompt:** Which classes had the biggest increases and decreases in undergraduate enrollments between September 1 and today? Make a graphic that shows the 5 biggest increases and decreases?
+
+
+
+
+
+## Scene 4
+
+What might have caused drops in these classes? Assume that one of the causes might have been the amount of work assigned in the first two weeks of class. Describe an ideal Preceptor Table with no missing data which would allow us to investigate this situation. What data is missing and why? With our actual Preceptor Table, how might we investigate the effect of work assigned in the first two weeks? Would the estimated Average Treatment Effect be accurate? Why or why not?
+
+
