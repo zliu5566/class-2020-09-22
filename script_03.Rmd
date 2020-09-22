@@ -4,9 +4,17 @@ author: "David Kane"
 output: html_document
 ---
 
-Go to https://registrar.fas.harvard.edu/faculty-staff/courses/enrollment and scroll down to "Access the Current Course Enrollment Numbers." Click on that to download the Excel file. Create a folder in your project called `new_data`. Move the Excel file into that folder. Note that, even if you did this last week, you are doing it again because Harvard has updated the file. The file might be dated either September 21 or 22. We won't know till class!
+Go to https://registrar.fas.harvard.edu/faculty-staff/courses/enrollment and 
+scroll down to "Access the Current Course Enrollment Numbers." Click on that to 
+download the Excel file. Create a folder in your project called `new_data`. Move
+the Excel file into that folder. Note that, even if you did this last week, you 
+are doing it again because Harvard has updated the file. The file might be dated
+either September 21 or 22. We won't know till class!
 
-Note that I have already created a directory called "old_data" and included the file from September 1 in it, along with other data which I have collected. Because I am your buddy, I even give you the code for reading it in! (Although I did leave one mistake for you to find . . .)
+Note that I have already created a directory called "old_data" and included the 
+file from September 1 in it, along with other data which I have collected. 
+Because I am your buddy, I even give you the code for reading it in! (Although I
+did leave one mistake for you to find . . .)
 
 Load **tidyverse**, **readxl* and **janitor** into your setup chunk.
 
@@ -20,7 +28,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Scene 0
 
-**Prompt:**  First, figure out what is wrong with the `sep_old` object. Edit the above code to fix it.
+**Prompt:**  First, figure out what is wrong with the `sep_old` object. Edit the
+above code to fix it.
 
 ```{r sc0}
 # Most groups got something like this going last week. Note the use of skip = 3
@@ -33,54 +42,96 @@ sep_old <-
   read_excel("old_data/class_enrollment_summary_by_term_9-1-2020.xlsx", 
              skip = 3) %>% 
   clean_names() %>% 
-  filter(! is.na(course_title)) %>% 
+  filter(!is.na(course_title)) %>% 
   select(-grad, -non_degree, -x_reg, -vus, -employee, 
          -withdraw, -total, -instructor_full_name, -course_section_code) %>%
-  rename(id = course_id,
-         title = course_title,
-         name = course_name,
+  rename(id = course_id, title = course_title, name = course_name, 
          department = course_department) %>% 
-  filter(u_grad > 10)
+  group_by(title, name, id, department) %>%
+  summarize(total_ugrad = sum(u_grad), .groups = "drop_last") %>%
+  filter(total_ugrad > 10)
 
+View(sep_old)
 # But this is not correct! Look for Gov 50: Data. What do you see? What can you
 # do to clean it up?
 ```
-
-
 
 
 ### Scene 1
 
 **Prompt:** Read in and clean the new data, creating an object called `sep_new`. 
 
+```{r}
+sep_new <- 
+  read_excel("new_data/class_enrollment_summary_by_term_9-22-2020.xlsx", 
+             skip = 3) %>% 
+  clean_names() %>%
+  filter(!is.na(course_title)) %>%
+  select(-grad, -non_degree, -x_reg, -vus, -employee, 
+         -withdraw, -total, -instructor_full_name, -course_section_code) %>%
+  rename(id = course_id, title = course_title, name = course_name, 
+         department = course_department) %>%
+  group_by(title, name, id, department) %>%
+  summarize(new_total_ugrad = sum(u_grad), .groups = "drop_last") %>%
+  filter(new_total_ugrad > 10)
 
+View(sep_new)
+```
 
 ### Scene 2
 
-**Prompt:** Dean Amanda Claybaugh is concerned about the drop in undergradaute enrollment in some courses between September 1 and today. She wants you to analyze this issue. Before you dive into the details, provide some bullet points as to how Wisdom and Temperance apply to this situation. Every student should have several bullet points. Someone will be asked to share their screen and discuss.
+**Prompt:** Dean Amanda Claybaugh is concerned about the drop in undergradaute 
+enrollment in some courses between September 1 and today. She wants you to 
+analyze this issue. Before you dive into the details, provide some bullet points
+as to how Wisdom and Temperance apply to this situation. Every student should 
+have several bullet points. Someone will be asked to share their screen and 
+discuss.
 
 Before we start on the model, Wisdom suggests we should:
-
+- Make reasonable assumptions
+- Keep in mind missing data
+- Keep in mind unobservable data
 
 After we have a model, Temperance suggests we should:
-
-
+- Keep in mind uncertainty in estimating the ATE
+- Keep in mind individual variation
+- Understand that randomization is impossible in this situation
+- Consider internal and external validity
 
 ### Scene 3
 
-**Prompt:** Which classes had the biggest increases and decreases in undergraduate enrollments between September 1 and today? Make a graphic that shows the 5 biggest increases and decreases. Make it look nice.
+**Prompt:** Which classes had the biggest increases and decreases in 
+undergraduate enrollments between September 1 and today? Make a graphic that 
+shows the 5 biggest increases and decreases. Make it look nice.
 
+```{r}
+sep_both <- inner_join(sep_old, sep_new, by = c("id", "name", "department",
+                                                "title"))
 
-
+sep_both %>%
+  mutate(changes = new_total_ugrad - total_ugrad) %>%
+  arrange(desc(changes))
+```
 
 
 ## Scene 4
 
-**Prompt:**  What might have caused drops in these classes? Assume that one of the causes might have been the amount of work assigned in the first two weeks of class. Create a simplified ideal Preceptor Table (using a spreadsheet of your choice) with no missing data which would allow us to investigate this situation. What data is missing and why? Create an actual Preceptor Table, again using a spreadsheet. How might we investigate the effect of work assigned in the first two weeks? Would the estimated Average Treatment Effect be accurate? Why or why not? Put some bullet points here and be prepared to show your spreadsheet to the class.
+**Prompt:**  What might have caused drops in these classes? Assume that one of 
+the causes might have been the amount of work assigned in the first two weeks of
+class. Create a simplified ideal Preceptor Table (using a spreadsheet of your 
+choice) with no missing data which would allow us to investigate this situation.
+What data is missing and why? Create an actual Preceptor Table, again using a 
+spreadsheet. How might we investigate the effect of work assigned in the first 
+two weeks? Would the estimated Average Treatment Effect be accurate? Why or why 
+not? Put some bullet points here and be prepared to show your spreadsheet to the
+class.
 
 
 ## Scene 5
 
-Read in the data for all the available dates and use it to make a graphic which shows the changes in enrollment over time. The **gghighlight** package might be useful, perhaps to highlight what has happened in Gov 50, as compared to the other 500 or so courses.
+Read in the data for all the available dates and use it to make a graphic which 
+shows the changes in enrollment over time. The **gghighlight** package might be 
+useful, perhaps to highlight what has happened in Gov 50, as compared to the 
+other 500 or so courses.
 
 
