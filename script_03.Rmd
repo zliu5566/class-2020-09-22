@@ -76,7 +76,7 @@ After we have a model, Temperance suggests we should:
 
 ## Scene 4
 
-**Prompt:**  What might have caused drops in these classes? Assume that one of the causes might have been the amount of work assigned in the first two weeks of class. Describe an ideal Preceptor Table with no missing data which would allow us to investigate this situation. What data is missing and why? With our actual Preceptor Table, how might we investigate the effect of work assigned in the first two weeks? Would the estimated Average Treatment Effect be accurate? Why or why not?
+**Prompt:**  What might have caused drops in these classes? Assume that one of the causes might have been the amount of work assigned in the first two weeks of class. Create a simplified ideal Preceptor Table (using a spreadsheet of your choice) with no missing data which would allow us to investigate this situation. What data is missing and why? Create an actual Preceptor Table, again using a spreadsheet. How might we investigate the effect of work assigned in the first two weeks? Would the estimated Average Treatment Effect be accurate? Why or why not? Put some bullet points here and be prepared to show your spreadsheet to the class.
 
 
 ## Scene 5
